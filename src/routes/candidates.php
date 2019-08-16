@@ -23,11 +23,12 @@ $app -> get('/candidates', function(Request $request, Response $response) {
 $app -> get('/candidates/{name}', function(Request $request, Response $response) {
     $name = $request->getAttribute('name');
     $conn = mysqli_connect('localhost', 'mockconv_testdbc', 'dbtest06984527', 'mockconv_database');
-    $response = $conn->query('SELECT * FROM Candidate AS c WHERE c.name = $name');
-    if($response) {
+    $response = $conn->query('SELECT * FROM Candidate WHERE lastName='."'$name'");
+    if ($response) {
         return get($response);
     } else {
-        return 'Oops, server got in trouble.';
+        echo 'Oops, server got in trouble.';
+        return null;
     };
     $conn->close();
 });
