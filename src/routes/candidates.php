@@ -6,10 +6,12 @@ use \Psr\Http\Message\ResponseInterface as Response;
 $app = new \Slim\App;
 
 include_once $_SERVER['DOCUMENT_ROOT'].'/api/src/utilities/responses.php';
+// include '../utilities/responses.php';
 
 # Route to get all Candidates
 $app -> get('/candidates', function(Request $request, Response $response) {
-    $conn = mysqli_connect('localhost', 'mockconv_testdbc', 'dbtest06984527', 'mockconv_database');
+    // $conn = mysqli_connect('localhost', 'mockconv_testdbc', 'dbtest06984527', 'mockconv_database') or die ("Connection failed: %s\n". $conn -> error);
+    $conn = mysqli_connect('localhost', 'mockconv_testdbc', 'dbtest06984527', 'mockconv_database') or die ("Connection failed: %s\n". $conn -> error);
     $response = $conn->query('SELECT * FROM Candidate');
     if($response) {
         return get($response);
