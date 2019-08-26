@@ -29,23 +29,24 @@ app.get("/", (req, res)=>{
     res.send("We have breached the atmosphere, captain");
 });
 
-//connecting to mysql db on phpmyadmin
-// var connection  = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'mockconv_testdbc',
-//     port: 3306,
-//     password: 'dbtest06984527',
-//     insecureAuth: true, 
-//     database: 'mockconv_database'
-// })
-
-var connection = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
+// connecting to mysql db on phpmyadmin(???)
+var connection  = mysql.createConnection({
+    host: 'localhost',
+    user: 'mockconv_testdbc',
     port: 3306,
-    password: 'Ozymandias123!',
-    database: 'database_beta_0'
+    password: 'dbtest06984527',
+    insecureAuth: true, 
+    database: 'mockconv_database'
 });
+
+//localhost connection
+// var connection = mysql.createConnection({
+//     host: '127.0.0.1',
+//     user: 'root',
+//     port: 3306,
+//     password: 'Ozymandias123!',
+//     database: 'database_beta_0'
+// });
 
 connection.connect((err)=>{
     if(err){
@@ -56,14 +57,16 @@ connection.connect((err)=>{
 });
 
 app.get("/candidates", (req, res)=>{
-    connection.query("SELECT * FROM Candidate", function(err, rows, fields){
-        if(err){
-            throw err;
+    connection.query("USE mockconv_database; SELECT * FROM Candidate;", connection.user, 
+        function(err, rows, fields){
+            if(err){
+                throw err;
+            }
+            res.json(rows);
+            console.log(rows);
+            // console.log("The solution is:", rows[0].solution);
         }
-        res.json(rows);
-        console.log(rows);
-        // console.log("The solution is:", rows[0].solution);
-    });
+    );
 });
 
 
