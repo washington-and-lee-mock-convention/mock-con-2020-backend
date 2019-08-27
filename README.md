@@ -1,7 +1,7 @@
 # mock-con-2020-backend
 
 ## Latest update ##
-Added support for MongoDB (mongo_app.js)
+Added support for MongoDB (mongo_app.js) and included candidate database in mongodb.
 
 ## Developer Set up ##
 1. Install Composer from https://getcomposer.org/download/ into local directory
