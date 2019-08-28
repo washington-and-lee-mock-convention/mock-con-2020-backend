@@ -6,7 +6,9 @@
 const { Builder, By, Key, util} = require('selenium-webdriver');
 const cheerio = require('cheerio');//makes easier to use jquery syntax. Parses html content
 const axios = require('axios');//makes http request and returns the site's html content as a response
+const client = require ('mongodb').MongoClient;
 
+var ObjectId = require('mongodb').ObjectId;
 
 const options = {
     nation_url: "https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts",
@@ -15,7 +17,7 @@ let precinct_county_tuples = [];
 
 //get the html content
 let html_body = '';
-axios.get(options.nation_url)
+axios.get(options.nation_url)//if someone can find a way to not have to include anything in the axios clause, that'd be great. Not imperative, though
     .then((response) => {
         let retrievePrecincts = (html) => {     
 
@@ -37,19 +39,15 @@ axios.get(options.nation_url)
                 }
 
                 let final_precincts = [];
-                let count = 0;
                 $(e.parent.parent.parent).find("ul li span a").each((k, e2)=>{
                     if( k ){
     
                         //parse string to retrieve precinct, county, and state names
                          final_precincts.push(e2.attribs.title);
-    
-                        count = count+1;
-                        let overflow = 1;
                     }
                 });
                 
-                //assigns 
+                //assigns each precinct to its respective state
                 for(j =0;j <precinct_county_tuples.length;j++){
                     for (i = 0; i < final_precincts.length; i++) { 
                         if(final_precincts[i].includes(precinct_county_tuples[j].state)){
@@ -65,6 +63,55 @@ axios.get(options.nation_url)
         //adds all of the precincts to precinct_county_tuples
         precinct_county_tuples = retrievePrecincts(response.data);
         console.log(precinct_county_tuples);
+
+        //---------------------------------------------------------------------
+        //add the precincts to mongo???
+        password  = "Ozymandias123!"
+        connect_uri = "mongodb+srv://alecaines:"+password+"@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
+        //establish connection and get resources for calls. Later try and distribute resource-collection to individual endpoitns, perhaps?
+        // client.connect(connect_uri, 
+        // {useNewUrlParser: true, useUnifiedTopology: true}, 
+        //     (err, db)=>{
+        //         if(err) {throw err}
+        //         var dbo = db.db("mc_db");
+            
+        //         for(i = 0;i<5;i++){
+        //             for(precinct in precinct_county_tuples[i].precincts){
+        //                 try{
+        //                     console.log(precinct,"to be isnerted");
+        //                     dbo.collection("precincts").insertOne(
+        //                         {
+        //                             precinct_ID: precinct_county_tuples[i].id,
+        //                             county_ID: null,//damn it
+        //                             precinct_name: precinct
+        //                         });
+        //                     // console.log(precinct_county_tuples[i], "inserted");
+        //                 }
+        //                 catch(err){
+        //                     throw err;
+        //                 }
+        //             }
+        //         }
+
+        //         // for(e in precinct_county_tuples){
+        //         //     for(precinct in e.precincts){
+        //         //         try{
+        //         //             console.log("trying")
+        //         //             dbo.collection("precincts").insertOne(
+        //         //                 {
+        //         //                     precinct_ID: e.id,
+        //         //                     county_ID: null,//damn it
+        //         //                     precinct_name: precinct
+        //         //                 });
+        //         //             console.log(precinct, "inserted");
+        //         //         }
+        //         //         catch(err){
+        //         //             throw err;
+        //         //         }
+                        
+        //         //     }
+        //         // }
+        // });
     })
     .catch(error => {
         console.log(error);
