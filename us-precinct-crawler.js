@@ -50,8 +50,11 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
                 //assigns each precinct to its respective state
                 for(j =0;j <precinct_county_tuples.length;j++){
                     for (i = 0; i < final_precincts.length; i++) { 
-                        if(final_precincts[i].includes(precinct_county_tuples[j].state)){
-                            precinct_county_tuples[j].precincts.push(final_precincts[i]);
+                        //if the precinct is not already in the precincts array and if it belongs to the state in question, then...
+                        if(!(final_precincts[i] in precinct_county_tuples[j].precincts)){
+                            if(final_precincts[i].includes(precinct_county_tuples[j].state)){
+                                precinct_county_tuples[j].precincts.push(final_precincts[i]);
+                            }
                         }
                     }
                 }
@@ -66,8 +69,8 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
 
         //---------------------------------------------------------------------
         //add the precincts to mongo???
-        password  = "Ozymandias123!"
-        connect_uri = "mongodb+srv://alecaines:"+password+"@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
+        // password  = "Ozymandias123!"
+        // connect_uri = "mongodb+srv://alecaines:"+password+"@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
         //establish connection and get resources for calls. Later try and distribute resource-collection to individual endpoitns, perhaps?
         // client.connect(connect_uri, 
         // {useNewUrlParser: true, useUnifiedTopology: true}, 
