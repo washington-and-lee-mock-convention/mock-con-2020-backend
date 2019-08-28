@@ -1,7 +1,7 @@
 /*
-   Retrieves the precincts for all fifty state from its 
-   respective wikipedia page and dumps it into an
-   array called precinct_county_tuples
+   Retrieves the precincts for all fifty state from its respective wikipedia 
+   page and dumps it into an array called precinct_county_tuples. The runtime
+   of this app is probably atrocious. If anyone wants to try to improve it, be my guest.
  */
 const { Builder, By, Key, util} = require('selenium-webdriver');
 const cheerio = require('cheerio');//makes easier to use jquery syntax. Parses html content
@@ -40,26 +40,24 @@ axios.get(options.nation_url)
                 let count = 0;
                 $(e.parent.parent.parent).find("ul li span a").each((k, e2)=>{
                     if( k ){
-                        // console.log(k, e2);
     
                         //parse string to retrieve precinct, county, and state names
-                         let precinct = (e2.attribs.title);
-                        // console.log(k);
+                         final_precincts.push(e2.attribs.title);
     
                         count = count+1;
                         let overflow = 1;
-                        if(precinct_county_tuples[count]){
-                            console.log(precinct_county_tuples[count]);
-                            precinct_county_tuples[count].precincts.push(precinct);
-                        }
-                        // else{
-                        //     precinct_county_tuples.push({id: (count+overflow), state:'',precincts: final_precincts});
-                        //     overflow = overflow+1;
-                        // }
                     }
                 });
-                // final_precincts = [];
-                // count = 0;
+                
+                //assigns 
+                for(j =0;j <precinct_county_tuples.length;j++){
+                    for (i = 0; i < final_precincts.length; i++) { 
+                        if(final_precincts[i].includes(precinct_county_tuples[j].state)){
+                            precinct_county_tuples[j].precincts.push(final_precincts[i]);
+                        }
+                    }
+                }
+
             });
 
             return precinct_county_tuples;
