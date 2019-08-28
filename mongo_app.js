@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const mysql = require('mysql');
-const mongo = require ('mongodb').MongoClient;
+const client = require ('mongodb').MongoClient;
 
 var ObjectId = require('mongodb').ObjectId;
 //initialize framework
@@ -30,10 +30,14 @@ app.get("/", (req, res)=>{
 
 cands = {};
 endorsers = [];
+states = [];
 greenlight = "";//doesn't do anything for now, but should be fleshed out in the future...
+legislation = {};
 
+password  = "Ozymandias123!"
+connect_uri = "mongodb+srv://alecaines:"+password+"@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
 //establish connection and get resources for calls. Later try and distribute resource-collection to individual endpoitns, perhaps?
-mongo.connect("mongodb+srv://alecaines:Ozymandias123!@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority", 
+client.connect(connect_uri, 
 {useNewUrlParser: true, useUnifiedTopology: true}, 
     (err, db)=>{
         if(err) {throw err}
@@ -45,7 +49,7 @@ mongo.connect("mongodb+srv://alecaines:Ozymandias123!@cluster0-5pgnh.mongodb.net
             cands = result;
             greenlight = "go";
             console.log("worked");
-            db.close();
+            // db.close();
         });
 
         //collect endorsement data from mongodb
@@ -54,7 +58,16 @@ mongo.connect("mongodb+srv://alecaines:Ozymandias123!@cluster0-5pgnh.mongodb.net
             endorsers = result;
             greenlight = "go";
             console.log("worked");
-            db.close();
+            // db.close();
+        });
+
+        //collect state data from mongodb
+        dbo.collection("states").find({}).toArray((err, result)=>{
+            if(err){throw err}
+            states = result;
+            greenlight = "go";
+            console.log("worked");
+            // db.close();
         });
     }
 );
@@ -71,6 +84,18 @@ app.get("/candidates", (req, res)=>{
     }
 });
 
+//states endpoint
+app.get("/states", (req, res)=>{
+    if(greenlight == "go"){
+        console.log(states);
+        res.json(states);
+        greenlight = "";
+    }
+    else{
+        res.json("refresh")
+    }
+});
+
 //endorsements endpoint
 app.get("/candidate_endorsements", (req, res)=>{
     if(greenlight == "go"){
@@ -80,6 +105,17 @@ app.get("/candidate_endorsements", (req, res)=>{
     }
     else{
         res.json("refresh")
+    }
+});
+
+//legislation endpoint
+app.get("/candidate_legislation", (req, res) => {
+    legis_uri = "https://api.govinfo.gov/packages/BILLS-116s129is/summary?api_key=tXSG9k1ZBOgarywn0AlyakeThJfgMwpyUrBRy1zN";
+
+    if(greenlight == "go"){
+        console.log(legislation);
+        res.json(legislation);
+        greenlight = "";
     }
 });
 
