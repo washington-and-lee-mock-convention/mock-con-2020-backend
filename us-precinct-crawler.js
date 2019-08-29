@@ -3,7 +3,6 @@
    page and dumps it into an array called precinct_county_tuples. The runtime
    of this app is probably atrocious. If anyone wants to try to improve it, be my guest.
  */
-const { Builder, By, Key, util} = require('selenium-webdriver');
 const cheerio = require('cheerio');//makes easier to use jquery syntax. Parses html content
 const axios = require('axios');//makes http request and returns the site's html content as a response
 const client = require ('mongodb').MongoClient;
@@ -14,12 +13,13 @@ const options = {
     nation_url: "https://en.wikipedia.org/wiki/List_of_United_States_congressional_districts",
 }
 let precinct_county_tuples = [];
+precinct_county_tuples = new Set(precinct_county_tuples);
 
 //get the html content
 let html_body = '';
 
 let final_precincts = [];
-final_precincts = new Set(final_precincts);
+final_precincts = new Set(final_precincts);//sets don't allow duplication. One less check on our end
 
 axios.get(options.nation_url)//if someone can find a way to not have to include anything in the axios clause, that'd be great. Not imperative, though
 .then((response) => {
@@ -28,7 +28,7 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
         //load the html
         const $ = cheerio.load(html);
 
-        //collects state names
+        //collects state names.
         $("body div div div div h2 span a").each((i, e) =>{
             //each iteration loads a new state into precinct_county_tuples
             if(i>0 && i<=57){
@@ -39,11 +39,15 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
                     state: s,
                     precincts: []
                 }
-                precinct_county_tuples.push(obj);
+                precinct_county_tuples.add(obj);
             }
 
             
             //goes back to the relative root of the doc and then searches for the precincts
+            //I don't think that this part has to be inside of the .each(...) loop that 
+            //collects the states. Its going through the entire page 57 times and collecting the same information
+            //if I understand correctly. However, when I move it, the precincts are not populated. For a later day, perhaps?
+            //it just ruins the runtime...
             $(e.parent.parent.parent).find("ul li span a").each((k, e2)=>{
                 if( k ){
 
@@ -51,16 +55,15 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
                     final_precincts.add(e2.attribs.title);
                 }
             });
-            //assigns each precinct to its respective state
 
         });
 
-        for(j =0;j <precinct_county_tuples.length;j++){
-
+        //assign the precincts to their respective state
+        for(let tuple of precinct_county_tuples){
             const iterator = final_precincts.values();
             for(let entry of iterator){
-                if(entry.includes(precinct_county_tuples[j].state)){
-                    precinct_county_tuples[j].precincts.push(entry);
+                if(entry.includes(tuple.state)){
+                    tuple.precincts.push(entry);
                 }
             }
         }
@@ -70,57 +73,59 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
     }
     //adds all of the precincts to precinct_county_tuples (but for some reason is not available outside of the scope of axios.get(...))
     precinct_county_tuples = retrievePrecincts(response.data);
-    console.log(precinct_county_tuples);
-    return precinct_county_tuples;
+
 
     //---------------------------------------------------------------------
     //add the precincts to mongo???
-    // password  = "Ozymandias123!"
-    // connect_uri = "mongodb+srv://alecaines:"+password+"@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
-    //establish connection and get resources for calls. Later try and distribute resource-collection to individual endpoitns, perhaps?
-    // client.connect(connect_uri, 
-    // {useNewUrlParser: true, useUnifiedTopology: true}, 
-    //     (err, db)=>{
-    //         if(err) {throw err}
-    //         var dbo = db.db("mc_db");
-        
-    //         for(i = 0;i<5;i++){
-    //             for(precinct in precinct_county_tuples[i].precincts){
-    //                 try{
-    //                     console.log(precinct,"to be isnerted");
-    //                     dbo.collection("precincts").insertOne(
-    //                         {
-    //                             precinct_ID: precinct_county_tuples[i].id,
-    //                             county_ID: null,//damn it
-    //                             precinct_name: precinct
-    //                         });
-    //                     // console.log(precinct_county_tuples[i], "inserted");
-    //                 }
-    //                 catch(err){
-    //                     throw err;
-    //                 }
-    //             }
-    //         }
+    let user = "alecaines"
+    let password  = "Ozymandias123!"
+    connect_uri = "mongodb+srv://alecaines:Ozymandias123!@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
+    // establish connection and get resources for calls. Later try and distribute resource-collection to individual endpoitns, perhaps?
+    client.connect(connect_uri, 
+    {useNewUrlParser: true, useUnifiedTopology: true}, 
+        (err, db)=>{
+            if(err) {throw err}
+            var dbo = db.db("mc_db");
 
-    //         // for(e in precinct_county_tuples){
-    //         //     for(precinct in e.precincts){
-    //         //         try{
-    //         //             console.log("trying")
-    //         //             dbo.collection("precincts").insertOne(
-    //         //                 {
-    //         //                     precinct_ID: e.id,
-    //         //                     county_ID: null,//damn it
-    //         //                     precinct_name: precinct
-    //         //                 });
-    //         //             console.log(precinct, "inserted");
-    //         //         }
-    //         //         catch(err){
-    //         //             throw err;
-    //         //         }
+            try{
+                // dbo.collection("precinct").drop();
+                // dbo.createCollection("precinct",{
+                //     capped: false,
+                //     autoIndexId: true,
+                // });
+
+                for(i = 0;i<2;i++){
+                    const iterator = precinct_county_tuples.values();
+                    for(let entry of iterator){
+                        for(j =0; j< entry.precincts.length;j++){
+                            try{
+                                dbo.collection("precinct").insertOne({
+                                    precinct_ID: entry.id,
+                                    county_ID: null,
+                                    precinct_name: entry.precincts[j]
+                                });
+                            }
+                            catch(err){
+                                throw err
+                            }
+                        }
+                        
+                    }
                     
-    //         //     }
-    //         // }
-    // });
+                }
+
+                return precinct_county_tuples;
+            }
+            catch (err){
+
+                throw ("the collection precinct may not exist");
+            }
+
+           
+
+        
+
+    });
 })
 .catch(error => {
     console.log(error);
