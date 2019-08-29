@@ -315,8 +315,8 @@ app.get("/county_election", (req, res)=>{
 //election endpoint
 app.get("/election", (req, res)=>{
     if(greenlight == "go"){
-        console.log(election);
-        res.json(election);
+        console.log(election_data);
+        res.json(election_data);
         greenlight = "";
     }
     else{
