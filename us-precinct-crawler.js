@@ -39,6 +39,7 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
                 }
 
                 let final_precincts = [];
+                //goes back to the relative root of the doc and then searches for the precincts
                 $(e.parent.parent.parent).find("ul li span a").each((k, e2)=>{
                     if( k ){
     

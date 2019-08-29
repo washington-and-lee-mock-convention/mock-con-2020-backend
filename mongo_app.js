@@ -62,13 +62,14 @@ client.connect(connect_uri,
         });
 
         //collect state data from mongodb
-        dbo.collection("states").find({}).toArray((err, result)=>{
+        dbo.collection("state").find({}).toArray((err, result)=>{
             if(err){throw err}
             states = result;
             greenlight = "go";
             console.log("worked");
             // db.close();
         });
+
     }
 );
 
