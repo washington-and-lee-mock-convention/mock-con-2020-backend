@@ -1,7 +1,9 @@
 # mock-con-2020-backend
+## Currently Working On##
+Scraper for the congressional voting districts (precincts) of each state (us-precinct-crawler.js)
 
 ## Latest update ##
-Added support for MongoDB (mongo_app.js) and included candidate table in mongodb collection (so their information is presentable if you run the whole app locally).
+Added support for MongoDB (mongo_app.js) and included every table in mongodb collection (so their information is presentable if you run the whole app locally).
 
 ## Developer Set up ##
 1. Install Composer from https://getcomposer.org/download/ into local directory
