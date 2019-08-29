@@ -14,6 +14,8 @@ const options = {
 }
 let precinct_county_tuples = [];
 precinct_county_tuples = new Set(precinct_county_tuples);
+county_names = new Set([]);
+
 
 //get the html content
 let html_body = '';
@@ -76,7 +78,7 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
 
 
     //---------------------------------------------------------------------
-    //add the precincts to mongo???
+    //add the precincts to mongo??? Should be changed to mysql later
     let user = "alecaines"
     let password  = "Ozymandias123!"
     connect_uri = "mongodb+srv://alecaines:Ozymandias123!@cluster0-5pgnh.mongodb.net/test?retryWrites=true&w=majority";
@@ -131,7 +133,23 @@ axios.get(options.nation_url)//if someone can find a way to not have to include 
     console.log(error);
 })
 
+axios.get(options.nation_url)//if someone can find a way to not have to include anything in the axios clause, that'd be great. Not imperative, though
+.then((response) => {
+    let retrieveCounties = (html) => {     
 
+        //return result after this line
+    }
+
+    county_names = retrieveCounties(response.data);
+    //append to approriate precincts in db
+    //method: 
+    //(1) find which precinct a county is in 
+    //(2) once the precinct is established, query the county table for the county id 
+    //(3) insert the county id into the precinct table
+})
+.catch(error => {
+    console.log(error);
+})
 
 function parseString(s){
     tuple= {
